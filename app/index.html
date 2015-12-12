@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<head><title>#cakewalk</title></head>
+<body></body>
+<style>
+html { font: 12px sans-serif }
+body { margin:0;background:#CCC;overflow:hidden; }
+.node {
+  border: solid 1px white;
+  font: 10px sans-serif;
+  line-height: 12px;
+  overflow: hidden;
+  position: absolute;
+  text-indent: 2px;
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+<script src="walk.js"></script>
+<script>
+var remote = require('remote');
+var fs = remote.require("fs");
+var path = remote.require('path');
+
+var c = {
+    w: 1200,
+    h: 800,
+    m: 0
+}
+
+var color = d3.scale.category20()
+
+var treemap = d3.layout.treemap()
+    .size([c.w, c.h])
+    .sticky(false)
+    .value(function(d) { return d.size; });
+
+var div, node;
+
+div = d3.select("body").append("div")
+	.style("position", "relative")
+	.style("width", (c.w) + "px")
+	.style("height", (c.h) + "px")
+	.style("left", 0 + "px")
+	.style("top", 0 + "px");
+
+function tree() {
+	d3.selectAll(".node").remove();
+
+	node = div.datum(clone(data)).selectAll(".node")
+		.data(treemap.nodes)
+		.enter()
+		.append("div")
+		.attr("class", "node")
+		.style("background", function(d,i) { return d.children ? color(d.index) : null; })
+		.text(function(d) { return d.children ? null : d.name; })
+		.call(position)
+}
+
+function position() {
+  this.style("left", function(d) { return d.x + "px"; })
+      .style("top", function(d) { return d.y + "px"; })
+      .style("width", function(d) { return Math.max(0, d.dx - 1) + "px"; })
+      .style("height", function(d) { return Math.max(0, d.dy - 1) + "px"; });
+}
+function clone(obj) {
+	return JSON.parse(JSON.stringify(obj));
+}
+
+</script>
+</html>
